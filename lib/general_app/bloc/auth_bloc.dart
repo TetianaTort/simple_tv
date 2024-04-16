@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:bloc/bloc.dart';
+import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:simple_tv/api/models/response_models/sign_in_data_response.dart';
 import 'package:simple_tv/data/auth_token_repo.dart';
@@ -47,12 +48,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(const _VerificationStatusAuthState());
-    if (Platform.isIOS || Platform.isAndroid) {
-      await _userRepository.setDeviceClass(DeviceClass.mobile.title);
-    } else if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
+    if (kIsWeb) {
       await _userRepository.setDeviceClass(DeviceClass.desktop.title);
     } else {
-      await _userRepository.setDeviceClass(DeviceClass.mobile.title);
+      if (Platform.isIOS || Platform.isAndroid) {
+        await _userRepository.setDeviceClass(DeviceClass.mobile.title);
+      } else if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
+        await _userRepository.setDeviceClass(DeviceClass.desktop.title);
+      } else {
+        await _userRepository.setDeviceClass(DeviceClass.mobile.title);
+      }
     }
 
     final token = await _tokenRepository.getToken();
